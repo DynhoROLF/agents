@@ -1,7 +1,20 @@
-import './App.css'
+import { BrowserRouter, Route, Routes } from "react-router"
+import "./index.css"
+import { CreateRoom } from "./pages/create-room"
+import { Room } from "./pages/room"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+
+const queryClient = new QueryClient()
 
 export function App() {
   return (
-    <h1>Hello World</h1>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<CreateRoom />} index />
+          <Route element={<Room />} path="/room/:roomId" />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }

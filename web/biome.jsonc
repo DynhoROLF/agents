@@ -5,7 +5,11 @@
   ],
   "javascript": {
     "formatter": {
-      "semicolons": "asNeeded"
+      "semicolons": "asNeeded",
+      "quoteStyle": "double"
+    },
+    "linter": {
+      "enabled": true
     }
   }
 }
