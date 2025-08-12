@@ -13,7 +13,8 @@ export const uploadAudioRoute: FastifyPluginCallbackZod = (app) => {
           roomId: z.string(),
         }),
       }
-    }, async (request, reply) => {
+    }, 
+    async (request, reply) => {
       const { roomId } = request.params
       const audio = await request.file()
 
@@ -26,17 +27,25 @@ export const uploadAudioRoute: FastifyPluginCallbackZod = (app) => {
       const audioBuffer = await audio.toBuffer()
       const audioAsBase64 = audioBuffer.toString('base64')
 
-      const transcription = await transcribeAudio(
-        audioAsBase64,
-        audio.mimetype,
-      )
+      const transcription = await transcribeAudio( audioAsBase64, audio.mimetype )
       const embeddings = await generateEmbeddings(transcription)
 
-      return { transcription, embeddings }
+      const result = await db
+        .insert(schema.audioChunks)
+        .values({
+          roomId,
+          transcription,
+          embeddings
+        })
+        .returning()
+    
+      const chunk = result[0]
 
-      //1. Transcrever o áudio
-      //2. Gerar o vetor semântico / embeddings
-      //3. Armazenar os vetores no banco de dados
+      if (!chunk) {
+        throw new Error('Erro ao salvar chunk de áudio')
+      }
+
+      return reply.status(201).send({ chunkId: chunk.id })
     }
   )
 }
